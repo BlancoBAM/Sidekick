@@ -1,0 +1,68 @@
+[
+  {
+    "name": "omniroute",
+    "base_url": "${OMNIROUTE_BASE_URL}",
+    "model": "${OMNIROUTE_MODEL}",
+    "api_key_env": "OMNIROUTE_API_KEY",
+    "key_optional": true,
+    "vision": true
+  },
+  {
+    "name": "openrouter-free",
+    "base_url": "https://openrouter.ai/api/v1",
+    "model": "${OPENROUTER_MODEL}",
+    "api_key_env": "OPENROUTER_API_KEY",
+    "vision": true
+  },
+  {
+    "name": "gemini-free",
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
+    "model": "${GEMINI_MODEL}",
+    "api_key_env": "GEMINI_API_KEY",
+    "vision": true
+  },
+  {
+    "name": "groq-free",
+    "base_url": "https://api.groq.com/openai/v1",
+    "model": "${GROQ_MODEL}",
+    "api_key_env": "GROQ_API_KEY",
+    "vision": false
+  },
+  {
+    "name": "cerebras-free",
+    "base_url": "https://api.cerebras.ai/v1",
+    "model": "${CEREBRAS_MODEL}",
+    "api_key_env": "CEREBRAS_API_KEY",
+    "vision": false
+  },
+  {
+    "name": "mistral-free",
+    "base_url": "https://api.mistral.ai/v1",
+    "model": "${MISTRAL_MODEL}",
+    "api_key_env": "MISTRAL_API_KEY",
+    "vision": false
+  },
+  {
+    "name": "minicpm-o-api",
+    "base_url": "https://api.modelbest.cn/v1",
+    "model": "MiniCPM-O-4.5-9B",
+    "api_key_env": "MINICPM_API_KEY",
+    "vision": true,
+    "enabled": false
+  },
+  {
+    "name": "ollama-local",
+    "base_url": "http://127.0.0.1:11434/v1",
+    "model": "${OLLAMA_MODEL}",
+    "key_optional": true,
+    "vision": false
+  },
+  {
+    "name": "lemonade-local",
+    "base_url": "http://127.0.0.1:13305/v1",
+    "model": "${LEMONADE_MODEL}",
+    "api_key_env": "",
+    "key_optional": true,
+    "vision": false
+  }
+]

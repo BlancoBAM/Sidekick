@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Sidekick page reader",
+  "version": "1.0.0",
+  "description": "Sends the quiz page's text to your local Sidekick server and shows the answer on the page.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["<all_urls>", "http://127.0.0.1:8765/*", "http://localhost:8765/*"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_title": "Ask Sidekick (Alt+Shift+S)" },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": { "default": "Alt+Shift+S" },
+      "description": "Ask Sidekick about this page"
+    }
+  },
+  "options_page": "options.html"
+}

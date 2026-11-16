@@ -1,0 +1,3 @@
+# Only needed for SERVER-side transcription (CPU). Browser-side Whisper needs nothing.
+# The server, doctor and tests are standard-library only.
+faster-whisper>=1.1.0
