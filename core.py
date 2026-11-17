@@ -362,6 +362,7 @@ class Transcriber:
         self.size, self.threads = size, threads
         self._model = None
         self._lock = threading.Lock()
+        self.last_error = ""
 
     @property
     def loaded(self) -> bool:
@@ -377,17 +378,25 @@ class Transcriber:
         return self._model
 
     def transcribe_pcm16(self, pcm: bytes, t0: float) -> list[tuple[float, str]]:
-        import numpy as np  # shipped with faster-whisper
+        try:
+            import numpy as np  # shipped with faster-whisper
+        except ImportError as e:
+            self.last_error = "numpy is not installed (server-side transcription unavailable; use browser WebGPU mode)"
+            return []
         if len(pcm) < 3200:  # < 0.1 s
             return []
         audio = np.frombuffer(pcm[: len(pcm) // 2 * 2], dtype="<i2").astype("float32") / 32768.0
         if float(np.sqrt(np.mean(audio ** 2))) < 0.003:  # silence
             return []
-        with self._lock:
-            model = self._ensure()
-            segs, _ = model.transcribe(audio, language="en", vad_filter=True,
-                                       condition_on_previous_text=False, beam_size=1)
-            return [(t0 + s.start, s.text) for s in segs]
+        try:
+            with self._lock:
+                model = self._ensure()
+                segs, _ = model.transcribe(audio, language="en", vad_filter=True,
+                                           condition_on_previous_text=False, beam_size=1)
+                return [(t0 + s.start, s.text) for s in segs]
+        except Exception as e:
+            self.last_error = str(e)[:300]
+            return []
 
 
 # --------------------------------------------------------------------------- #
@@ -457,12 +466,12 @@ class App:
         }
 
     def add_audio(self, vid: int | None, pcm: bytes, t0: float) -> int:
-        try:
-            segs = self.transcriber.transcribe_pcm16(pcm, t0)
-        except Exception as e:  # surfaced in /api/state, not fatal
-            self.last_audio_error = str(e)[:300]
-            raise
-        self.last_audio_error = ""
+        segs = self.transcriber.transcribe_pcm16(pcm, t0)
+        terr = getattr(self.transcriber, "last_error", "") or ""
+        if terr:
+            self.last_audio_error = terr
+        else:
+            self.last_audio_error = ""
         return self.store.add(vid, segs)
 
     def ask(self, question: str, page_url: str = "", image_b64: str | None = None,

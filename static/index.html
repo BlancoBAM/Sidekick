@@ -227,6 +227,7 @@ body.streaming .backend-help, body.streaming .backend-panel .hint{ opacity:.5; }
             </label>
           </div>
           <div id="status" class="status-line mut">Idle · waiting for audio source</div>
+          <div id="whisperErr" class="bad" style="display:none;margin-top:8px;"></div>
           <div class="instructions"><strong>Capture instructions</strong><br>Choose the <strong>Tab</strong> containing your course video, then enable <strong>Also share tab audio</strong>. Do not select Window or Entire screen. The first browser run downloads the Whisper model (~200 MB); wait for <strong>browser whisper: ready</strong> before playback.</div>
           <div class="eli-card">
             <span class="eli-step">ELI10 — Step 1</span>
@@ -524,8 +525,15 @@ function startWorker() {
     const m = ev.data;
     if (m.type === "status") {
       workerReady = m.state === "ready";
-      if (m.state === "error") { log("WebGPU Whisper failed: " + m.message + " - falling back to server", "warn"); $("mode").value = "server"; }
-      else log(`browser whisper: ${m.state} ${m.message}`, m.state === "ready" ? "ok" : "mut");
+      if (m.state === "error") {
+        const msg = "WebGPU Whisper failed: " + m.message;
+        log(msg, "warn");
+        $("mode").value = "server";
+        const err = $("whisperErr"); err.textContent = msg; err.style.display = "block";
+      } else {
+        $("whisperErr").style.display = "none";
+        log(`browser whisper: ${m.state} ${m.message}`, m.state === "ready" ? "ok" : "mut");
+      }
     } else if (m.type === "result") {
       pending--; paint(); failures = 0;
       try { await post("/api/segments", { video: m.vid, segments: m.segments }); } catch (e) { log("could not store segments: " + e.message, "bad"); }
@@ -535,7 +543,7 @@ function startWorker() {
       sendToServer({ vid: m.vid, t0: m.t0, audio: m.audio });
     }
   };
-  worker.onerror = (e) => { log("worker error: " + (e.message || "unknown") + " - using server", "warn"); $("mode").value = "server"; };
+  worker.onerror = (e) => { const msg = "worker error: " + (e.message || "unknown") + " - using server"; log(msg, "warn"); $("mode").value = "server"; const err = $("whisperErr"); err.textContent = msg; err.style.display = "block"; };
   worker.postMessage({ type: "init", model: state.browser_whisper_model || "onnx-community/whisper-base.en", dtype: dtype ? dtype : undefined });
 }
 
